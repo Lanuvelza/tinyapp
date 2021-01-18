@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Lanuvelza/tinyapp/issues"
   },
-  "homepage": "https://github.com/Lanuvelza/tinyapp#readme"
+  "homepage": "https://github.com/Lanuvelza/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
