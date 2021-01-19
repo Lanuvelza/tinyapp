@@ -13,7 +13,7 @@ const urlDatabase = {
 
 // generates a string of 6 random alphanumeric characters
 function generateRandomString() {
-  return Math.floor((1 + Math.random()) * 0x100000).toString(16);
+  return Math.floor((1 + Math.random()) * 0x10000000).toString(36);
 }
 
 app.get("/", (req, res) => {
@@ -40,9 +40,9 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
 
-  const shortString = generateRandomString(); 
-  urlDatabase[shortString] = req.body.longURL;
-  res.redirect(`/urls/${shortString}`)
+  const shortURL = generateRandomString(); 
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`)
 
 });
 
