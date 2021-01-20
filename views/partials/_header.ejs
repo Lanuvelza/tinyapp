@@ -11,9 +11,9 @@
 
       </div>
     </ul>
-    <% if (username) { %>
+    <% if (user) { %>
       <div class="nav-item">
-        <h4> Logged in As: <%= username %> </h4>
+        <h4> Logged in As: <%= user.email %> </h4>
       </div>
     </br>
       <form class="form-inline my-2 my-lg-0" method="POST" action="/logout">
