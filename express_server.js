@@ -102,8 +102,22 @@ app.get("/login", (req, res) => {
 
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect("/urls");
+
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (getUserByEmail(email)) {
+    const user = getUserByEmail(email); 
+    
+    if (user.password === password) {
+      res.cookie('user_id', user.id);
+      res.redirect("urls"); 
+    }
+
+    res.sendStatus(403);
+  } 
+  res.sendStatus(403);
+
 });
 
 app.post("/logout", (req, res) => {
