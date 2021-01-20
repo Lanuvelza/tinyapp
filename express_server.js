@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser"); 
+const cookieParser = require("cookie-parser");
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -14,23 +14,23 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 // generates a string of 6 random alphanumeric characters
-function generateRandomString() {
+const generateRandomString = function() {
   return Math.floor((1 + Math.random()) * 0x10000000).toString(36);
-}
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -45,35 +45,43 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
   res.render('urls_index', templateVars);
 });
 
-// must be above the route /urls/:id 
+// must be above the route /urls/:id
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies["user_id"]]
-  };
+  const user = users[req.cookies["user_id"]];
 
-  res.render("urls_new", templateVars);
+  if (!user) {
+    res.redirect("/login");
+  } else {
+
+    const templateVars = {
+      user
+    };
+
+    res.render("urls_new", templateVars);
+    
+  }
 });
 
 app.post("/urls", (req, res) => {
 
-  const shortURL = generateRandomString(); 
+  const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`)
+  res.redirect(`/urls/${shortURL}`);
 
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   
-  const templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL], 
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
@@ -81,7 +89,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
 
-  urlDatabase[req.params.shortURL] = req.body.longURL; 
+  urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -110,19 +118,19 @@ app.post("/login", (req, res) => {
   if (!getUserByEmail(email)) {
     res.sendStatus(403);
 
-  } else if (!getUserByEmail(email).password === password) { 
+  } else if (!getUserByEmail(email).password === password) {
     res.sendStatus(403);
   
   } else {
-    res.cookie('user_id', getUserByEmail(email).id); 
-    res.redirect("urls"); 
+    res.cookie('user_id', getUserByEmail(email).id);
+    res.redirect("urls");
   }
 
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect("/urls"); 
+  res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
@@ -131,21 +139,21 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
 
-  const id = generateRandomString(); 
-  const email = req.body.email; 
-  const password = req.body.password; 
+  const id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
 
-  if (email === "" || password === "" ) {
+  if (email === "" || password === "") {
     res.sendStatus(400);
   } else if (getUserByEmail(email)) {
     res.sendStatus(400);
   } else {
 
     users[id] = {
-      id, 
+      id,
       email,
       password
-    }; 
+    };
   
     res.cookie('user_id', id);
     res.redirect("/urls");
@@ -155,7 +163,7 @@ app.post("/register", (req, res) => {
 
 
 
-// Helper functions 
+// Helper functions
 
 
 // retrieves the user object if the email exists in the user database
@@ -163,10 +171,10 @@ const getUserByEmail = function(email) {
   for (const user in users) {
     if (users[user].email === email) {
 
-      return users[user]; 
+      return users[user];
     }
   }
-}
+};
 
 
 
