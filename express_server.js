@@ -112,19 +112,43 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+
   const id = generateRandomString(); 
   const email = req.body.email; 
   const password = req.body.password; 
 
-  users[id] = {
-    id, 
-    email,
-    password
-  }; 
+  if (email === "" || password === "" ) {
+    res.sendStatus(400);
+  } else if (checkUserEmail(email)) {
+    res.sendStatus(400);
+  } else {
 
-  res.cookie('user_id', id);
-  res.redirect("urls");
+    users[id] = {
+      id, 
+      email,
+      password
+    }; 
+  
+    res.cookie('user_id', id);
+    res.redirect("urls");
+  }
+
 });
+
+
+// Helper functions 
+
+// Checks if the user email exists within the users database
+const checkUserEmail = function(email) {
+  for (const user in users) {
+    if (users[user].email === email) {
+
+      return true;
+    }
+  }
+  return false;
+}
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
