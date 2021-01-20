@@ -123,7 +123,7 @@ app.post("/register", (req, res) => {
 
   if (email === "" || password === "" ) {
     res.sendStatus(400);
-  } else if (checkUserEmail(email)) {
+  } else if (getUserByEmail(email)) {
     res.sendStatus(400);
   } else {
 
@@ -142,16 +142,17 @@ app.post("/register", (req, res) => {
 
 // Helper functions 
 
-// Checks if the user email exists within the users database
-const checkUserEmail = function(email) {
+
+// retrieves the user object if the email exists in the user database
+const getUserByEmail = function(email) {
   for (const user in users) {
     if (users[user].email === email) {
 
-      return true;
+      return users[user]; 
     }
   }
-  return false;
 }
+
 
 
 app.listen(PORT, () => {
