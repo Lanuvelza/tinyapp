@@ -178,6 +178,17 @@ const getUserByEmail = function(email) {
   }
 };
 
+// returns the URLs where the given userID is equal to the id of the currently logged user 
+const urlsForUser = function(id) {
+  const database = {}
+  for (const url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      let userurl = urlDatabase[url];
+      database[url] = userurl; 
+    }
+  }
+  return database; 
+}
 
 
 app.listen(PORT, () => {
