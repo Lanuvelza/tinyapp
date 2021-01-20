@@ -57,6 +57,7 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]]
   };
+
   res.render("urls_new", templateVars);
 });
 
@@ -106,23 +107,22 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (getUserByEmail(email)) {
-    const user = getUserByEmail(email); 
-    
-    if (user.password === password) {
-      res.cookie('user_id', user.id);
-      res.redirect("urls"); 
-    }
-
+  if (!getUserByEmail(email)) {
     res.sendStatus(403);
-  } 
-  res.sendStatus(403);
+
+  } else if (!getUserByEmail(email).password === password) { 
+    res.sendStatus(403);
+  
+  } else {
+    res.cookie('user_id', getUserByEmail(email).id); 
+    res.redirect("urls"); 
+  }
 
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect("urls"); 
+  res.redirect("/urls"); 
 });
 
 app.get("/register", (req, res) => {
@@ -148,7 +148,7 @@ app.post("/register", (req, res) => {
     }; 
   
     res.cookie('user_id', id);
-    res.redirect("urls");
+    res.redirect("/urls");
   }
 
 });
