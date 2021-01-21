@@ -40,6 +40,16 @@ const generateRandomString = function() {
   return Math.floor((1 + Math.random()) * 0x10000000).toString(36);
 };
 
+
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
 // if user is logged in, redirect to /urls 
 // if user is not logged in, redirect to /login
 app.get("/", (req, res) => {
@@ -49,14 +59,6 @@ app.get("/", (req, res) => {
   } else {
     res.redirect("/urls");
   }
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 // if user is logged in, displays a list of URLs the user has created 
@@ -76,35 +78,6 @@ app.get("/urls", (req, res) => {
     res.render('urls_index', templateVars);
   }
 });
-
-
-// adds the new URL to the list of URLs the user has created and redirects to page of urls/:id where :id matches the ID of the newly save URL
-// if user is not logged in, return an error indicating the user is not logged in
-app.post("/urls", (req, res) => {
-  const user = users[req.cookies["user_id"]];
-  
-  if (!user) {
-    res.status(403).send("User not logged in"); 
-  } else {
-    
-    // generates a new ID for the shortURL
-    const shortURL = generateRandomString();
-    // assigns the longURL to the inputted longURL
-    const longURL = req.body.longURL;
-    // assigns the logged user ID to the user ID of the shortURL
-    const userID = user.id; 
-
-    // adds the new shortURL onto the database
-    urlDatabase[shortURL] = {
-      longURL,
-      userID
-    };
-
-    res.redirect(`/urls/${shortURL}`);
-  }
-
-});
-
 
 // must be above the route /urls/:id
 // if user is logged in, displays a form which the user can create a new shortURL given an long original URL in the input text
@@ -151,6 +124,47 @@ app.get("/urls/:shortURL", (req, res) => {
   
 });
 
+// if user for the given ID exists, redirects to the corresponding long URL
+// if URL for the given ID does not exist, return an error message indidcating the short URL does not exist
+app.get("/u/:shortURL", (req, res) => {
+
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("Short URL does not exist") 
+  } else {
+
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  }
+
+});
+
+
+// adds the new URL to the list of URLs the user has created and redirects to page of urls/:id where :id matches the ID of the newly save URL
+// if user is not logged in, return an error indicating the user is not logged in
+app.post("/urls", (req, res) => {
+  const user = users[req.cookies["user_id"]];
+  
+  if (!user) {
+    res.status(403).send("User not logged in"); 
+  } else {
+    
+    // generates a new ID for the shortURL
+    const shortURL = generateRandomString();
+    // assigns the longURL to the inputted longURL
+    const longURL = req.body.longURL;
+    // assigns the logged user ID to the user ID of the shortURL
+    const userID = user.id; 
+
+    // adds the new shortURL onto the database
+    urlDatabase[shortURL] = {
+      longURL,
+      userID
+    };
+
+    res.redirect(`/urls/${shortURL}`);
+  }
+
+});
 
 // if user is logged in and owns the URL for the given ID, updates the URL and redirects to /urls page
 // if user is not logged in, return an error message indicating that the user is not logged in
@@ -166,20 +180,6 @@ app.post("/urls/:shortURL", (req, res) => {
 
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
-  }
-
-});
-
-// if user for the given ID exists, redirects to the corresponding long URL
-// if URL for the given ID does not exist, return an error message indidcating the short URL does not exist
-app.get("/u/:shortURL", (req, res) => {
-
-  if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("Short URL does not exist") 
-  } else {
-
-    const longURL = urlDatabase[req.params.shortURL].longURL;
-    res.redirect(longURL);
   }
 
 });
@@ -204,9 +204,17 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 
-
+// if user is logged in, redirect to /urls page
+// if user is not logged in, displays the login form page where the user inputs an email and password
 app.get("/login", (req, res) => {
-  res.render("urls_login");
+  const user = users[req.cookies["user_id"]];
+
+  if(!user) {
+    res.render("urls_login");
+  } else {
+    res.redirect("/urls");
+  }
+
 });
 
 
