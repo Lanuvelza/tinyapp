@@ -67,7 +67,8 @@ app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]]; 
 
   if (!user) {
-    res.status(403).send("User not logged in");
+    const templateVars = { user }; 
+    res.render("urls_404", templateVars); 
   } else {
 
     const templateVars = {
@@ -106,7 +107,8 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = users[req.cookies["user_id"]];
 
   if (!user) {
-    res.status(403).send("User not logged in");
+    const templateVars = { user }; 
+    res.render("urls_404", templateVars); 
   } else if (!urlDatabase[req.params.shortURL]) {
     res.status(404).send("Short URL does not exist"); 
   } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
@@ -145,7 +147,8 @@ app.post("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]];
   
   if (!user) {
-    res.status(403).send("User not logged in"); 
+    const templateVars = { user }; 
+    res.render("urls_404", templateVars); 
   } else {
     
     // generates a new ID for the shortURL
@@ -173,7 +176,8 @@ app.post("/urls/:shortURL", (req, res) => {
   const user = users[req.cookies["user_id"]]; 
 
   if (!user) {
-    res.status(403).send("User not logged in");
+    const templateVars = { user }; 
+    res.render("urls_404", templateVars); 
   } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
     res.status(403).send("Incorrect user of short URL ID");
   } else {
@@ -191,7 +195,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const user = users[req.cookies["user_id"]];
 
   if (!user) {
-    res.status(403).send("User not logged in")
+    const templateVars = { user }; 
+    res.render("urls_404", templateVars); 
   } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
     res.status(403).send("Incorrect user of short URL ID")
   } else {
