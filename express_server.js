@@ -59,14 +59,22 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+// if user is logged in, displays a list of URLs the user has created 
+// if user is not logged in, return an error 
 app.get("/urls", (req, res) => {
+  const user = users[req.cookies["user_id"]]; 
 
-  const templateVars = {
-    urls: urlsForUser(req.cookies["user_id"]),
-    user: users[req.cookies["user_id"]]
-  };
+  if (!user) {
+    res.status(403).send("User not logged in");
+  } else {
 
-  res.render('urls_index', templateVars);
+    const templateVars = {
+      urls: urlsForUser(req.cookies["user_id"]),
+      user: users[req.cookies["user_id"]]
+    };
+    
+    res.render('urls_index', templateVars);
+  }
 });
 
 // must be above the route /urls/:id
