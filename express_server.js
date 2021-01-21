@@ -40,10 +40,6 @@ const generateRandomString = function() {
   return Math.floor((1 + Math.random()) * 0x10000000).toString(36);
 };
 
-//
-// All GET Routes 
-//
-
 // if user is logged in, redirect to /urls 
 // if user is not logged in, redirect to /login
 app.get("/", (req, res) => {
@@ -64,7 +60,7 @@ app.get("/hello", (req, res) => {
 });
 
 // if user is logged in, displays a list of URLs the user has created 
-// if user is not logged in, return an error indicating that the user is no logged in
+// if user is not logged in, return an error indicating that the user is not logged in
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]]; 
 
@@ -81,10 +77,37 @@ app.get("/urls", (req, res) => {
   }
 });
 
+
+// adds the new URL to the list of URLs the user has created and redirects to page of urls/:id where :id matches the ID of the newly save URL
+// if user is not logged in, return an error indicating the user is not logged in
+app.post("/urls", (req, res) => {
+  const user = users[req.cookies["user_id"]];
+  
+  if (!user) {
+    res.status(403).send("User not logged in"); 
+  } else {
+    
+    // generates a new ID for the shortURL
+    const shortURL = generateRandomString();
+    // assigns the longURL to the inputted longURL
+    const longURL = req.body.longURL;
+    // assigns the logged user ID to the user ID of the shortURL
+    const userID = user.id; 
+
+    // adds the new shortURL onto the database
+    urlDatabase[shortURL] = {
+      longURL,
+      userID
+    };
+
+    res.redirect(`/urls/${shortURL}`);
+  }
+
+});
+
+
 // must be above the route /urls/:id
-// if user is not logged in, 
-// displays a form which the user can create a new shortURL 
-// given an long original URL in the input text
+// if user is not logged in, displays a form which the user can create a new shortURL given an long original URL in the input text
 // if user is not logged in, redirects to the login page
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]];
@@ -102,9 +125,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-// if user is logged in and owns the URL for the given ID
-// displays the page where it shows the shortURL for given ID, 
-// a corresponding long URL and an update button should the user decide to change the corresponding long ID
+// if user is logged in and owns the URL for the given ID, displays the page where it shows the information of the shortURL for a given ID, 
 // if the user is not logged in, returns an error message saying user not logged in
 // if a URL for a given ID does not exist, return an error message indicating the the Short URL does not exist
 // if the URL ID does not match the user Id, return an error message indicating that the user is the incorrect user of that short URL ID
@@ -144,26 +165,8 @@ app.get("/u/:shortURL", (req, res) => {
 
 });
 
-app.post("/urls", (req, res) => {
-  const user = users[req.cookies["user_id"]];
-  
-  if (!user) {
-    res.sendStatus(403); 
-  } else {
-    
-    const shortURL = generateRandomString();
-    const longURL = req.body.longURL;
-    const userID = user.id; 
 
 
-    urlDatabase[shortURL] = {
-      longURL,
-      userID
-    };
-    res.redirect(`/urls/${shortURL}`);
-  }
-
-});
 
 
 
