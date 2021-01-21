@@ -40,8 +40,15 @@ const generateRandomString = function() {
   return Math.floor((1 + Math.random()) * 0x10000000).toString(36);
 };
 
+// if user is logged in, redirect to /urls 
+// if user is not logged in, redirect to /login
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const user = users[req.cookies["user_id"]]; 
+  if(!user) {
+    res.redirect("/login");
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -220,10 +227,6 @@ app.post("/register", (req, res) => {
   }
 
 });
-
-const hashedPassword = bcrypt.hashSync("purple-monkey-dinosaur", 10);
-console.log(bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword));
-console.log(bcrypt.compareSync("pink-monkey-dinosaur", hashedPassword));
 
 
 // Helper functions
