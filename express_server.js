@@ -26,6 +26,11 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
+  },
+  "aJ48lW": {
+    id: "aJ48lW",
+    email: "user3@example.com",
+    password: "hello"
   }
 };
 
@@ -47,10 +52,12 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+
   const templateVars = {
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies["user_id"]),
     user: users[req.cookies["user_id"]]
   };
+
   res.render('urls_index', templateVars);
 });
 
@@ -86,12 +93,13 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies["user_id"]]
   };
+
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
 
-  urlDatabase[req.params.shortURL] = req.body.longURL;
+  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -178,7 +186,8 @@ const getUserByEmail = function(email) {
   }
 };
 
-// returns the URLs where the given userID is equal to the id of the currently logged user 
+// returns the database of URLs where the given userID 
+// is equal to the id of the currently logged user 
 const urlsForUser = function(id) {
   const database = {}
   for (const url in urlDatabase) {
