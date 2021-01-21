@@ -7,6 +7,10 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 
+
+// imported helper functions 
+const { getUserByEmail, urlsForUser } = require('./helpers')
+
 // Middleware
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -267,15 +271,15 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (!getUserByEmail(email)) {
+  if (!getUserByEmail(email, users)) {
     res.sendStatus(403);
 
-  } else if (!bcrypt.compareSync(password, getUserByEmail(email).password)) {
+  } else if (!bcrypt.compareSync(password, getUserByEmail(email, users).password)) {
     res.sendStatus(403);
   
   } else {
 
-    req.session.user_id = getUserByEmail(email).id;
+    req.session.user_id = getUserByEmail(email, users).id;
     res.redirect("urls");
   }
 
@@ -294,7 +298,7 @@ app.post("/register", (req, res) => {
 
   if (email === "" || password === "") {
     res.sendStatus(400);
-  } else if (getUserByEmail(email)) {
+  } else if (getUserByEmail(email, users)) {
     res.sendStatus(400);
   } else {
 
@@ -331,31 +335,7 @@ app.listen(PORT, () => {
 
 
 
-// Helper functions
 
-// retrieves the user object if the email exists in the user database
-const getUserByEmail = function(email) {
-  for (const user in users) {
-    if (users[user].email === email) {
-
-      return users[user];
-    }
-  }
-};
-
-// returns the database of URLs where the given userID
-// is equal to the id of the currently logged user
-const urlsForUser = function(id) {
-
-  const database = {};
-  for (const url in urlDatabase) {
-    if (urlDatabase[url].userID === id) {
-      let userurl = urlDatabase[url];
-      database[url] = userurl;
-    }
-  }
-  return database;
-};
 
 
 
