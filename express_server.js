@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -200,6 +201,7 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10)
 
   if (email === "" || password === "") {
     res.sendStatus(400);
@@ -210,7 +212,7 @@ app.post("/register", (req, res) => {
     users[id] = {
       id,
       email,
-      password
+      password: hashedPassword
     };
   
     res.cookie('user_id', id);
@@ -219,11 +221,12 @@ app.post("/register", (req, res) => {
 
 });
 
+const hashedPassword = bcrypt.hashSync("purple-monkey-dinosaur", 10);
+console.log(bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword));
+console.log(bcrypt.compareSync("pink-monkey-dinosaur", hashedPassword));
 
 
 // Helper functions
-
-
 // retrieves the user object if the email exists in the user database
 const getUserByEmail = function(email) {
   for (const user in users) {
