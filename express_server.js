@@ -40,6 +40,10 @@ const generateRandomString = function() {
   return Math.floor((1 + Math.random()) * 0x10000000).toString(36);
 };
 
+//
+// All GET Routes 
+//
+
 // if user is logged in, redirect to /urls 
 // if user is not logged in, redirect to /login
 app.get("/", (req, res) => {
@@ -60,7 +64,7 @@ app.get("/hello", (req, res) => {
 });
 
 // if user is logged in, displays a list of URLs the user has created 
-// if user is not logged in, return an error 
+// if user is not logged in, return an error indicating that the user is no logged in
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]]; 
 
@@ -70,14 +74,12 @@ app.get("/urls", (req, res) => {
 
     const templateVars = {
       urls: urlsForUser(req.cookies["user_id"]),
-      user: users[req.cookies["user_id"]]
+      user
     };
     
     res.render('urls_index', templateVars);
   }
 });
-
-
 
 // must be above the route /urls/:id
 // if user is not logged in, 
@@ -98,6 +100,34 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_new", templateVars);
     
   }
+});
+
+// if user is logged in and owns the URL for the given ID
+// displays the page where it shows the shortURL for given ID, 
+// a corresponding long URL and an update button should the user decide to change the corresponding long ID
+// if the user is not logged in, returns an error message saying user not logged in
+// if a URL for a given ID does not exist, return an error message indicating the the Short URL does not exist
+// if the URL ID does not match the user Id, return an error message indicating that the user is the incorrect user of that short URL ID
+app.get("/urls/:shortURL", (req, res) => {
+  const user = users[req.cookies["user_id"]];
+
+  if (!user) {
+    res.status(403).send("User not logged in");
+  } else if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("Short URL does not exist"); 
+  } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
+    res.status(403).send("Incorrect user of short URL ID"); 
+  } else {
+
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user
+    };
+  
+    res.render("urls_show", templateVars);
+  }
+  
 });
 
 app.post("/urls", (req, res) => {
@@ -121,22 +151,7 @@ app.post("/urls", (req, res) => {
 
 });
 
-app.get("/urls/:shortURL", (req, res) => {
 
-  if (!urlDatabase[req.params.shortURL]) {
-    res.sendStatus(404);
-  } else {
-
-    const templateVars = {
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL,
-      user: users[req.cookies["user_id"]]
-    };
-  
-    res.render("urls_show", templateVars);
-  }
-  
-});
 
 app.post("/urls/:shortURL", (req, res) => {
   const user = users[req.cookies["user_id"]]; 
