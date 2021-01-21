@@ -102,6 +102,8 @@ app.post("/urls/:shortURL", (req, res) => {
 
   if (!user) {
     res.sendStatus(403); 
+  } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
+    res.sendStatus(403);
   } else {
 
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
@@ -115,7 +117,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
   if (!user) {
     res.sendStatus(403);
+  } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
+    res.sendStatus(403);
   } else {
+    
     const shortURL = req.params.shortURL;
     delete urlDatabase[shortURL];
     res.redirect("/urls");
@@ -141,7 +146,7 @@ app.post("/login", (req, res) => {
   if (!getUserByEmail(email)) {
     res.sendStatus(403);
 
-  } else if (!getUserByEmail(email).password === password) {
+  } else if (getUserByEmail(email).password !== password) {
     res.sendStatus(403);
   
   } else {
