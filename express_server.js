@@ -50,13 +50,13 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// if user is logged in, redirect to /urls 
+// if user is logged in, redirect to /urls
 // if user is not logged in, redirect to /login
 app.get("/", (req, res) => {
 
-  const user = users[req.cookies["user_id"]]; 
+  const user = users[req.cookies["user_id"]];
 
-  if(!user) {
+  if (!user) {
     res.redirect("/login");
   } else {
     res.redirect("/urls");
@@ -64,16 +64,16 @@ app.get("/", (req, res) => {
 
 });
 
-// if user is logged in, displays a list of URLs the user has created 
+// if user is logged in, displays a list of URLs the user has created
 // if user is not logged in, return an error indicating that the user is not logged in
 app.get("/urls", (req, res) => {
 
-  const user = users[req.cookies["user_id"]]; 
+  const user = users[req.cookies["user_id"]];
   const urls = urlsForUser(req.cookies["user_id"]);
 
   if (!user) {
-    const templateVars = { user }; 
-    res.render("urls_404", templateVars); 
+    const templateVars = { user };
+    res.render("urls_404", templateVars);
   } else {
 
     const templateVars = {
@@ -102,25 +102,25 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-// if user is logged in and owns the URL for the given ID, displays the page where it shows the information of the shortURL for a given ID, 
+// if user is logged in and owns the URL for the given ID, displays the page where it shows the information of the shortURL for a given ID,
 // if the user is not logged in, returns an error message saying user not logged in
-// if a URL for a given ID does not exist, return a 404 error message 
+// if a URL for a given ID does not exist, return a 404 error message
 // if the URL ID does not match the user Id, return a 403 error message
 app.get("/urls/:shortURL", (req, res) => {
 
   const user = users[req.cookies["user_id"]];
-  const shortURL = req.params.shortURL; 
+  const shortURL = req.params.shortURL;
   
   if (!user) {
-    const templateVars = { user }; 
-    res.render("urls_404", templateVars); 
+    const templateVars = { user };
+    res.render("urls_404", templateVars);
   } else if (!urlDatabase[shortURL]) {
     res.sendStatus(404);
   } else if (urlDatabase[shortURL].userID !== user.id) {
     res.sendStatus(403);
   } else {
 
-    const longURL = urlDatabase[shortURL].longURL; 
+    const longURL = urlDatabase[shortURL].longURL;
     
     const templateVars = {
       shortURL,
@@ -134,7 +134,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // if user for the given ID exists, redirects to the corresponding long URL
-// if URL for the given ID does not exist, return a 404 error message 
+// if URL for the given ID does not exist, return a 404 error message
 app.get("/u/:shortURL", (req, res) => {
 
   const shortURL = req.params.shortURL;
@@ -161,11 +161,11 @@ app.post("/urls", (req, res) => {
   // assigns the longURL to the inputted longURL
   const longURL = req.body.longURL;
   // assigns the logged user ID to the user ID of the shortURL
-  const userID = user.id; 
+  const userID = user.id;
   
   if (!user) {
-    const templateVars = { user }; 
-    res.render("urls_404", templateVars); 
+    const templateVars = { user };
+    res.render("urls_404", templateVars);
   } else {
     // adds the new shortURL onto the database
     urlDatabase[shortURL] = {
@@ -179,15 +179,15 @@ app.post("/urls", (req, res) => {
 
 // if user is logged in and owns the URL for the given ID, updates the URL and redirects to /urls page
 // if user is not logged in, return an error message indicating that the user is not logged in
-// if user is logged in but does not own the URL for the given ID, return a 403 error message  
+// if user is logged in but does not own the URL for the given ID, return a 403 error message
 app.post("/urls/:shortURL", (req, res) => {
 
-  const user = users[req.cookies["user_id"]]; 
+  const user = users[req.cookies["user_id"]];
   const shortURL = req.params.shortURL;
 
   if (!user) {
-    const templateVars = { user }; 
-    res.render("urls_404", templateVars); 
+    const templateVars = { user };
+    res.render("urls_404", templateVars);
   } else if (urlDatabase[shortURL].userID !== user.id) {
     res.sendStatus(403);
   } else {
@@ -200,15 +200,15 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // if user is logged and owns the URL for the given ID, delete the URL and redirect back to /urls page
 // if user is not logged in, return an error indicating that the user is not logged in
-// if user is logged in but does not own the URL for the given ID, returns a 403 error message 
+// if user is logged in but does not own the URL for the given ID, returns a 403 error message
 app.post("/urls/:shortURL/delete", (req, res) => {
 
   const user = users[req.cookies["user_id"]];
   const shortURL = req.params.shortURL;
 
   if (!user) {
-    const templateVars = { user }; 
-    res.render("urls_404", templateVars); 
+    const templateVars = { user };
+    res.render("urls_404", templateVars);
   } else if (urlDatabase[shortURL].userID !== user.id) {
     res.sendStatus(403);
   } else {
@@ -226,7 +226,7 @@ app.get("/login", (req, res) => {
 
   const user = users[req.cookies["user_id"]];
 
-  if(!user) {
+  if (!user) {
     res.render("urls_login");
   } else {
     res.redirect("/urls");
@@ -239,18 +239,18 @@ app.get("/login", (req, res) => {
 // if user is not logged in, displays the register form page where the user inputs an email and password to register
 app.get("/register", (req, res) => {
 
-  const user = users[req.cookies["user_id"]]; 
+  const user = users[req.cookies["user_id"]];
   
-  if(!user) {
+  if (!user) {
     res.render("urls_register");
   } else {
-    res.redirect("/urls")
+    res.redirect("/urls");
   }
 });
 
 // if email and password match an existing user, immediately sets the user ID as a cookie and redirects to /urls page
-// if email and password params do not match exisitng user, return a 403 error message 
-// checks passwords using bycrpt 
+// if email and password params do not match exisitng user, return a 403 error message
+// checks passwords using bycrpt
 app.post("/login", (req, res) => {
 
   const email = req.body.email;
@@ -269,15 +269,15 @@ app.post("/login", (req, res) => {
 
 });
 
-// creates and registers a new user in user database, assigns registered user ID to a cookie and redirects user to /urls page 
-// if submitted email or password is empty, returns 400 error message 
-// if email already exists in user database, return 400 error message 
+// creates and registers a new user in user database, assigns registered user ID to a cookie and redirects user to /urls page
+// if submitted email or password is empty, returns 400 error message
+// if email already exists in user database, return 400 error message
 app.post("/register", (req, res) => {
 
   // generates a new ID for the user
   const id = generateRandomString();
   const email = req.body.email;
-  // encrypts new user's password with bcrypt 
+  // encrypts new user's password with bcrypt
   const password = bcrypt.hashSync(req.body.password, 10);
 
   if (email === "" || password === "") {
@@ -331,19 +331,19 @@ const getUserByEmail = function(email) {
   }
 };
 
-// returns the database of URLs where the given userID 
-// is equal to the id of the currently logged user 
+// returns the database of URLs where the given userID
+// is equal to the id of the currently logged user
 const urlsForUser = function(id) {
 
-  const database = {}
+  const database = {};
   for (const url in urlDatabase) {
     if (urlDatabase[url].userID === id) {
       let userurl = urlDatabase[url];
-      database[url] = userurl; 
+      database[url] = userurl;
     }
   }
-  return database; 
-}
+  return database;
+};
 
 
 
