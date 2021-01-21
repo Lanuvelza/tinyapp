@@ -151,6 +151,25 @@ app.get("/urls/:shortURL", (req, res) => {
   
 });
 
+
+// if user is logged in and owns the URL for the given ID, updates the URL and redirects to /urls page
+// if user is not logged in, return an error message indicating that the user is not logged in
+// if user is logged in but does not own the URL for the given ID, return an error message indicating that the user is not the correct user of the URL 
+app.post("/urls/:shortURL", (req, res) => {
+  const user = users[req.cookies["user_id"]]; 
+
+  if (!user) {
+    res.status(403).send("User not logged in");
+  } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
+    res.status(403).send("Incorrect user of short URL ID");
+  } else {
+
+    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+    res.redirect("/urls");
+  }
+
+});
+
 // if user for the given ID exists, redirects to the corresponding long URL
 // if URL for the given ID does not exist, return an error message indidcating the short URL does not exist
 app.get("/u/:shortURL", (req, res) => {
@@ -165,27 +184,6 @@ app.get("/u/:shortURL", (req, res) => {
 
 });
 
-
-
-
-
-
-app.post("/urls/:shortURL", (req, res) => {
-  const user = users[req.cookies["user_id"]]; 
-
-  if (!user) {
-    res.sendStatus(403); 
-  } else if (!urlDatabase[req.params.shortURL]) {
-    res.sendStatus(404);
-  } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
-    res.sendStatus(403);
-  } else {
-
-    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-    res.redirect("/urls");
-  }
-
-});
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = users[req.cookies["user_id"]];
@@ -266,6 +264,7 @@ app.post("/register", (req, res) => {
 
 
 // Helper functions
+
 // retrieves the user object if the email exists in the user database
 const getUserByEmail = function(email) {
   for (const user in users) {
