@@ -98,16 +98,29 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
+  const user = users[req.cookies["user_id"]]; 
 
-  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-  res.redirect("/urls");
+  if (!user) {
+    res.sendStatus(403); 
+  } else {
+
+    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+    res.redirect("/urls");
+  }
+
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const user = users[req.cookies["user_id"]];
 
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+  if (!user) {
+    res.sendStatus(403);
+  } else {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL];
+    res.redirect("/urls");
+  }
+
 });
 
 app.get("/u/:shortURL", (req, res) => {
