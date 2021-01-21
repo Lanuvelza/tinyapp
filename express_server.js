@@ -1,15 +1,25 @@
+// imported modules 
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const bcrypt = require('bcrypt');
+const cookieSession = require('cookie-session');
 
+// Middleware
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(express.static('public'));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+})); 
 
+// sets the view engine for rendering as EJS files 
 app.set("view engine", "ejs");
 
+// Example of Database Structure for urls and users
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
   "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" },
@@ -54,7 +64,7 @@ app.get("/hello", (req, res) => {
 // if user is not logged in, redirect to /login
 app.get("/", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
 
   if (!user) {
     res.redirect("/login");
@@ -68,8 +78,8 @@ app.get("/", (req, res) => {
 // if user is not logged in, return an error indicating that the user is not logged in
 app.get("/urls", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
-  const urls = urlsForUser(req.cookies["user_id"]);
+  const user = users[req.session.user_id];
+  const urls = urlsForUser(req.session.user_id);
 
   if (!user) {
     const templateVars = { user };
@@ -90,7 +100,7 @@ app.get("/urls", (req, res) => {
 // if user is not logged in, redirects to the login page
 app.get("/urls/new", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
 
   if (!user) {
     res.redirect("/login");
@@ -108,7 +118,7 @@ app.get("/urls/new", (req, res) => {
 // if the URL ID does not match the user Id, return a 403 error message
 app.get("/urls/:shortURL", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   const shortURL = req.params.shortURL;
   
   if (!user) {
@@ -155,7 +165,7 @@ app.get("/u/:shortURL", (req, res) => {
 // if user is not logged in, return an error indicating the user is not logged in
 app.post("/urls", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   // generates a new ID for the shortURL
   const shortURL = generateRandomString();
   // assigns the longURL to the inputted longURL
@@ -182,7 +192,7 @@ app.post("/urls", (req, res) => {
 // if user is logged in but does not own the URL for the given ID, return a 403 error message
 app.post("/urls/:shortURL", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   const shortURL = req.params.shortURL;
 
   if (!user) {
@@ -203,7 +213,7 @@ app.post("/urls/:shortURL", (req, res) => {
 // if user is logged in but does not own the URL for the given ID, returns a 403 error message
 app.post("/urls/:shortURL/delete", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   const shortURL = req.params.shortURL;
 
   if (!user) {
@@ -224,7 +234,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // if user is not logged in, displays the login form page where the user inputs an email and password
 app.get("/login", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
 
   if (!user) {
     res.render("urls_login");
@@ -239,13 +249,14 @@ app.get("/login", (req, res) => {
 // if user is not logged in, displays the register form page where the user inputs an email and password to register
 app.get("/register", (req, res) => {
 
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   
   if (!user) {
     res.render("urls_register");
   } else {
     res.redirect("/urls");
   }
+
 });
 
 // if email and password match an existing user, immediately sets the user ID as a cookie and redirects to /urls page
@@ -263,7 +274,8 @@ app.post("/login", (req, res) => {
     res.sendStatus(403);
   
   } else {
-    res.cookie('user_id', getUserByEmail(email).id);
+
+    req.session.user_id = getUserByEmail(email).id;
     res.redirect("urls");
   }
 
@@ -294,7 +306,7 @@ app.post("/register", (req, res) => {
       password
     };
   
-    res.cookie('user_id', id);
+    req.session.user_id = id; 
     res.redirect("/urls");
   }
 
@@ -303,7 +315,7 @@ app.post("/register", (req, res) => {
 // logs the user out and clears the cookie
 // redirects user back to /urls page
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  req.session.user_id = null;
   res.redirect("/urls");
 });
 
