@@ -237,6 +237,7 @@ app.get("/register", (req, res) => {
 
 // if email and password match an existing user, immediately sets the user ID as a cookie and redirects to /urls page
 // if email and password params do not match exisitng user, return an error message saying invalid email or password
+// checks passwords using bycrpt 
 app.post("/login", (req, res) => {
 
   const email = req.body.email;
@@ -245,7 +246,7 @@ app.post("/login", (req, res) => {
   if (!getUserByEmail(email)) {
     res.status(403).send("Invalid email");
 
-  } else if (getUserByEmail(email).password !== password) {
+  } else if (!bcrypt.compareSync(password, getUserByEmail(email).password)) {
     res.status(403).send("Invalid password");
   
   } else {
