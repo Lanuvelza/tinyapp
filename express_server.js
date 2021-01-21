@@ -107,7 +107,7 @@ app.post("/urls", (req, res) => {
 
 
 // must be above the route /urls/:id
-// if user is not logged in, displays a form which the user can create a new shortURL given an long original URL in the input text
+// if user is logged in, displays a form which the user can create a new shortURL given an long original URL in the input text
 // if user is not logged in, redirects to the login page
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]];
@@ -184,16 +184,16 @@ app.get("/u/:shortURL", (req, res) => {
 
 });
 
-
+// if user is logged and owns the URL for the given ID, delete the URL and redirect back to /urls page
+// if user is not logged in, return an error message indicating that the user is not logged in
+// if user is logged in but does not own the URL for the given ID, returns an error message indicating that the user is not the correct user of the URL 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = users[req.cookies["user_id"]];
 
   if (!user) {
-    res.sendStatus(403);
-  } else if (!urlDatabase[req.params.shortURL]) {
-    res.sendStatus(404);
+    res.status(403).send("User not logged in")
   } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
-    res.sendStatus(403);
+    res.status(403).send("Incorrect user of short URL ID")
   } else {
     
     const shortURL = req.params.shortURL;
