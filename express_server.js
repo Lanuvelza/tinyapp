@@ -190,7 +190,7 @@ app.post("/urls", (req, res) => {
 // if user is logged in and owns the URL for the given ID, updates the URL and redirects to /urls page
 // if user is not logged in, return an error message indicating that the user is not logged in
 // if user is logged in but does not own the URL for the given ID, return a 403 error message
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
 
   const user = users[req.session.userId];
   const shortURL = req.params.shortURL;
@@ -211,7 +211,7 @@ app.post("/urls/:shortURL", (req, res) => {
 // if user is logged and owns the URL for the given ID, delete the URL and redirect back to /urls page
 // if user is not logged in, return an error indicating that the user is not logged in
 // if user is logged in but does not own the URL for the given ID, returns a 403 error message
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
 
   const user = users[req.session.userId];
   const shortURL = req.params.shortURL;
