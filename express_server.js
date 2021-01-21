@@ -307,10 +307,17 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+// catches a request to any other pages and return 404 error message
+app.get("*", (req, res) => {
+  res.sendStatus(404);
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
 
 // Helper functions
 
