@@ -104,23 +104,24 @@ app.get("/urls/new", (req, res) => {
 
 // if user is logged in and owns the URL for the given ID, displays the page where it shows the information of the shortURL for a given ID, 
 // if the user is not logged in, returns an error message saying user not logged in
-// if a URL for a given ID does not exist, return an error message indicating the the Short URL does not exist
-// if the URL ID does not match the user Id, return an error message indicating that the user is the incorrect user of that short URL ID
+// if a URL for a given ID does not exist, return a 404 error message 
+// if the URL ID does not match the user Id, return a 403 error message
 app.get("/urls/:shortURL", (req, res) => {
 
   const user = users[req.cookies["user_id"]];
   const shortURL = req.params.shortURL; 
-  const longURL = urlDatabase[req.params.shortURL].longURL; 
-
+  
   if (!user) {
     const templateVars = { user }; 
     res.render("urls_404", templateVars); 
   } else if (!urlDatabase[shortURL]) {
-    res.status(404).send("Short URL does not exist"); 
+    res.sendStatus(404);
   } else if (urlDatabase[shortURL].userID !== user.id) {
-    res.status(403).send("Incorrect user of short URL ID"); 
+    res.sendStatus(403);
   } else {
 
+    const longURL = urlDatabase[shortURL].longURL; 
+    
     const templateVars = {
       shortURL,
       longURL,
@@ -133,14 +134,17 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // if user for the given ID exists, redirects to the corresponding long URL
-// if URL for the given ID does not exist, return an error message indidcating the short URL does not exist
+// if URL for the given ID does not exist, return a 404 error message 
 app.get("/u/:shortURL", (req, res) => {
 
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-
-  if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("Short URL does not exist") 
+  const shortURL = req.params.shortURL;
+  
+  if (!urlDatabase[shortURL]) {
+    res.sendStatus(404);
   } else {
+
+    const longURL = urlDatabase[shortURL].longURL;
+
     res.redirect(longURL);
   }
 
@@ -175,27 +179,28 @@ app.post("/urls", (req, res) => {
 
 // if user is logged in and owns the URL for the given ID, updates the URL and redirects to /urls page
 // if user is not logged in, return an error message indicating that the user is not logged in
-// if user is logged in but does not own the URL for the given ID, return an error message indicating that the user is not the correct user of the URL 
+// if user is logged in but does not own the URL for the given ID, return a 403 error message  
 app.post("/urls/:shortURL", (req, res) => {
 
   const user = users[req.cookies["user_id"]]; 
+  const shortURL = req.params.shortURL;
 
   if (!user) {
     const templateVars = { user }; 
     res.render("urls_404", templateVars); 
-  } else if (urlDatabase[req.params.shortURL].userID !== user.id) {
-    res.status(403).send("Incorrect user of short URL ID");
+  } else if (urlDatabase[shortURL].userID !== user.id) {
+    res.sendStatus(403);
   } else {
 
-    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+    urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
   }
 
 });
 
 // if user is logged and owns the URL for the given ID, delete the URL and redirect back to /urls page
-// if user is not logged in, return an error message indicating that the user is not logged in
-// if user is logged in but does not own the URL for the given ID, returns an error message indicating that the user is not the correct user of the URL 
+// if user is not logged in, return an error indicating that the user is not logged in
+// if user is logged in but does not own the URL for the given ID, returns a 403 error message 
 app.post("/urls/:shortURL/delete", (req, res) => {
 
   const user = users[req.cookies["user_id"]];
@@ -205,7 +210,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     const templateVars = { user }; 
     res.render("urls_404", templateVars); 
   } else if (urlDatabase[shortURL].userID !== user.id) {
-    res.status(403).send("Incorrect user of short URL ID")
+    res.sendStatus(403);
   } else {
 
     delete urlDatabase[shortURL];
@@ -244,7 +249,7 @@ app.get("/register", (req, res) => {
 });
 
 // if email and password match an existing user, immediately sets the user ID as a cookie and redirects to /urls page
-// if email and password params do not match exisitng user, return an error message saying invalid email or password
+// if email and password params do not match exisitng user, return a 403 error message 
 // checks passwords using bycrpt 
 app.post("/login", (req, res) => {
 
@@ -252,10 +257,10 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
 
   if (!getUserByEmail(email)) {
-    res.status(403).send("Invalid email");
+    res.sendStatus(403);
 
   } else if (!bcrypt.compareSync(password, getUserByEmail(email).password)) {
-    res.status(403).send("Invalid password");
+    res.sendStatus(403);
   
   } else {
     res.cookie('user_id', getUserByEmail(email).id);
@@ -265,8 +270,8 @@ app.post("/login", (req, res) => {
 });
 
 // creates and registers a new user in user database, assigns registered user ID to a cookie and redirects user to /urls page 
-// if submitted email or password is empty, returns error message stating invalid email or password
-// if email already exists in user database, return error message stating user already exists
+// if submitted email or password is empty, returns 400 error message 
+// if email already exists in user database, return 400 error message 
 app.post("/register", (req, res) => {
 
   // generates a new ID for the user
@@ -276,9 +281,9 @@ app.post("/register", (req, res) => {
   const password = bcrypt.hashSync(req.body.password, 10);
 
   if (email === "" || password === "") {
-    res.status(400).send("Invalid Email or password"); 
+    res.sendStatus(400);
   } else if (getUserByEmail(email)) {
-    res.status(400).send("User already exists"); 
+    res.sendStatus(400);
   } else {
 
     // adds user's registered information onto the user database
