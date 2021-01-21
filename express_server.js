@@ -218,6 +218,18 @@ app.get("/login", (req, res) => {
 });
 
 
+// if user is logged in, redirect to /urls page
+// if user is not logged in, displays the register form page where the user inputs an email and password to register
+app.get("/register", (req, res) => {
+  const user = users[req.cookies["user_id"]]; 
+  
+  if(!user) {
+    res.render("urls_register");
+  } else {
+    res.redirect("/urls")
+  }
+});
+
 app.post("/login", (req, res) => {
 
   const email = req.body.email;
@@ -241,9 +253,7 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-app.get("/register", (req, res) => {
-  res.render("urls_register");
-});
+
 
 app.post("/register", (req, res) => {
 
