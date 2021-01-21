@@ -77,7 +77,13 @@ app.get("/urls", (req, res) => {
   }
 });
 
+
+
 // must be above the route /urls/:id
+// if user is not logged in, 
+// displays a form which the user can create a new shortURL 
+// given an long original URL in the input text
+// if user is not logged in, redirects to the login page
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]];
 
