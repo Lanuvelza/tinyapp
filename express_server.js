@@ -255,21 +255,26 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-
-
+// creates and registers a new user in user database, assigns registered user ID to a cookie and redirects user to /urls page 
+// if submitted email or password is empty, returns error message stating invalid email or password
+// if email already exists in user database, return error message stating user already exists
 app.post("/register", (req, res) => {
 
+  // generates a new ID for the user
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10)
+  // encrypts new user's password with bcrypt 
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (email === "" || password === "") {
-    res.sendStatus(400);
+    res.status(400).send("Invalid Email or password"); 
   } else if (getUserByEmail(email)) {
-    res.sendStatus(400);
+    res.status(400).send("User already exists"); 
   } else {
 
+    // adds user's registered information onto the user database
+    // adds the user's encrypted password onto the database
     users[id] = {
       id,
       email,
