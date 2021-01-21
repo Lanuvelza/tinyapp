@@ -295,6 +295,10 @@ app.post("/logout", (req, res) => {
 });
 
 
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
+
 // Helper functions
 
 // retrieves the user object if the email exists in the user database
@@ -321,8 +325,6 @@ const urlsForUser = function(id) {
 }
 
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+
 
 
