@@ -130,6 +130,20 @@ app.get("/urls/:shortURL", (req, res) => {
   
 });
 
+// if user for the given ID exists, redirects to the corresponding long URL
+// if URL for the given ID does not exist, return an error message indidcating the short URL does not exist
+app.get("/u/:shortURL", (req, res) => {
+
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("Short URL does not exist") 
+  } else {
+
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  }
+
+});
+
 app.post("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]];
   
@@ -188,17 +202,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 });
 
-app.get("/u/:shortURL", (req, res) => {
 
-  if (!urlDatabase[req.params.shortURL]) {
-    res.sendStatus(404); 
-  } else {
-
-    const longURL = urlDatabase[req.params.shortURL].longURL;
-    res.redirect(longURL);
-  }
-
-});
 
 app.get("/login", (req, res) => {
   res.render("urls_login");
