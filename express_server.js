@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
+const methodOverride = require('method-override'); 
 
 
 // imported helper functions
@@ -19,6 +20,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
+app.use(methodOverride('_method')); 
 
 // sets the view engine for rendering as EJS files
 app.set("view engine", "ejs");
