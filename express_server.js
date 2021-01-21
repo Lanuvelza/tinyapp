@@ -250,11 +250,6 @@ app.post("/login", (req, res) => {
 
 });
 
-app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
-  res.redirect("/login");
-});
-
 // creates and registers a new user in user database, assigns registered user ID to a cookie and redirects user to /urls page 
 // if submitted email or password is empty, returns error message stating invalid email or password
 // if email already exists in user database, return error message stating user already exists
@@ -285,6 +280,13 @@ app.post("/register", (req, res) => {
     res.redirect("/urls");
   }
 
+});
+
+// logs the user out and clears the cookie
+// redirects user back to /urls page
+app.post("/logout", (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect("/urls");
 });
 
 
