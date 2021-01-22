@@ -51,15 +51,6 @@ const users = {
   }
 };
 
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 // if user is logged in, redirect to /urls
 // if user is not logged in, redirect to /login
 app.get("/", (req, res) => {
@@ -177,7 +168,7 @@ app.post("/urls", (req, res) => {
     const longURL = req.body.longURL;
     // assigns the logged user ID to the user ID of the shortURL
     const userID = user.id;
-    
+
     // adds the new shortURL onto the database
     urlDatabase[shortURL] = {
       longURL,
