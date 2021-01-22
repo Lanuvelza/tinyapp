@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-const methodOverride = require('method-override'); 
+const methodOverride = require('method-override');
 
 
 // imported helper functions
@@ -20,7 +20,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
-app.use(methodOverride('_method')); 
+app.use(methodOverride('_method'));
 
 // sets the view engine for rendering as EJS files
 app.set("view engine", "ejs");
@@ -166,17 +166,18 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/urls", (req, res) => {
 
   const user = users[req.session.userId];
-  // generates a new ID for the shortURL
-  const shortURL = generateRandomString();
-  // assigns the longURL to the inputted longURL
-  const longURL = req.body.longURL;
-  // assigns the logged user ID to the user ID of the shortURL
-  const userID = user.id;
   
   if (!user) {
     const templateVars = { user };
     res.render("urls_404", templateVars);
   } else {
+    // generates a new ID for the shortURL
+    const shortURL = generateRandomString();
+    // assigns the longURL to the inputted longURL
+    const longURL = req.body.longURL;
+    // assigns the logged user ID to the user ID of the shortURL
+    const userID = user.id;
+    
     // adds the new shortURL onto the database
     urlDatabase[shortURL] = {
       longURL,
