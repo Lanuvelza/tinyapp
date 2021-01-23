@@ -62,7 +62,6 @@ app.get("/", (req, res) => {
   } else {
     res.redirect("/urls");
   }
-
 });
 
 // if user is logged in, displays a list of URLs the user has created
@@ -76,12 +75,10 @@ app.get("/urls", (req, res) => {
     const templateVars = { user };
     res.render("urls_404", templateVars);
   } else {
-
     const templateVars = {
       urls,
       user
     };
-    
     res.render('urls_index', templateVars);
   }
 });
@@ -96,10 +93,8 @@ app.get("/urls/new", (req, res) => {
   if (!user) {
     res.redirect("/login");
   } else {
-
     const templateVars = { user };
     res.render("urls_new", templateVars);
-    
   }
 });
 
@@ -128,10 +123,8 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL,
       user
     };
-  
     res.render("urls_show", templateVars);
   }
-  
 });
 
 // if user for the given ID exists, redirects to the corresponding long URL
@@ -143,9 +136,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[shortURL]) {
     res.sendStatus(404);
   } else {
-
     const longURL = urlDatabase[shortURL].longURL;
-
     res.redirect(longURL);
   }
 
@@ -193,7 +184,6 @@ app.put("/urls/:shortURL", (req, res) => {
   } else if (urlDatabase[shortURL].userID !== user.id) {
     res.sendStatus(403);
   } else {
-
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
   }
@@ -214,11 +204,9 @@ app.delete("/urls/:shortURL", (req, res) => {
   } else if (urlDatabase[shortURL].userID !== user.id) {
     res.sendStatus(403);
   } else {
-
     delete urlDatabase[shortURL];
     res.redirect("/urls");
   }
-
 });
 
 
@@ -234,7 +222,6 @@ app.get("/login", (req, res) => {
   } else {
     res.redirect("/urls");
   }
-
 });
 
 
@@ -263,16 +250,12 @@ app.post("/login", (req, res) => {
 
   if (!getUserByEmail(email, users)) {
     res.sendStatus(403);
-
   } else if (!bcrypt.compareSync(password, getUserByEmail(email, users).password)) {
     res.sendStatus(403);
-  
   } else {
-
     req.session.userId = getUserByEmail(email, users).id;
     res.redirect("urls");
   }
-
 });
 
 // creates and registers a new user in user database, assigns registered user ID to a cookie and redirects user to /urls page
@@ -283,27 +266,26 @@ app.post("/register", (req, res) => {
   // generates a new ID for the user
   const id = generateRandomString();
   const email = req.body.email;
-  // encrypts new user's password with bcrypt
-  const password = bcrypt.hashSync(req.body.password, 10);
+  const password = req.body.password;
 
   if (email === "" || password === "") {
     res.sendStatus(400);
   } else if (getUserByEmail(email, users)) {
     res.sendStatus(400);
   } else {
+    // encrypts new user's password with bcrypt
+    const hashPassword = bcrypt.hashSync(password, 10);
 
     // adds user's registered information onto the user database
     // adds the user's encrypted password onto the database
     users[id] = {
       id,
       email,
-      password
+      hashPassword
     };
-  
     req.session.userId = id;
     res.redirect("/urls");
   }
-
 });
 
 // logs the user out and clears the cookie
