@@ -249,9 +249,9 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
 
   if (!getUserByEmail(email, users)) {
-    res.sendStatus(403);
+    res.status(403).send("Invalid Email");
   } else if (!bcrypt.compareSync(password, getUserByEmail(email, users).password)) {
-    res.sendStatus(403);
+    res.status(403).send("Invalid password");
   } else {
     req.session.userId = getUserByEmail(email, users).id;
     res.redirect("urls");
@@ -263,25 +263,23 @@ app.post("/login", (req, res) => {
 // if email already exists in user database, return 400 error message
 app.post("/register", (req, res) => {
 
-  // generates a new ID for the user
-  const id = generateRandomString();
-  const email = req.body.email;
-  const password = req.body.password;
-
-  if (email === "" || password === "") {
+  if (!req.body.email || !req.body.password) {
     res.sendStatus(400);
-  } else if (getUserByEmail(email, users)) {
+  } else if (getUserByEmail(req.body.email, users)) {
     res.sendStatus(400);
   } else {
+    // generates a new ID for the user
+    const id = generateRandomString();
+    const email = req.body.email;
     // encrypts new user's password with bcrypt
-    const hashPassword = bcrypt.hashSync(password, 10);
+    const password = bcrypt.hashSync(req.body.password, 10);
 
     // adds user's registered information onto the user database
     // adds the user's encrypted password onto the database
     users[id] = {
       id,
       email,
-      hashPassword
+      password
     };
     req.session.userId = id;
     res.redirect("/urls");
