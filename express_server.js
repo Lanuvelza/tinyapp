@@ -10,7 +10,7 @@ const methodOverride = require('method-override');
 
 
 // imported helper functions
-const { generateRandomString, getUserByEmail, urlsForUser } = require('./helpers');
+const { generateRandomString, getUserByEmail, urlsForUser, update } = require('./helpers');
 
 // Middleware
 app.use(bodyParser.urlencoded({extended: true}));
@@ -27,10 +27,33 @@ app.set("view engine", "ejs");
 
 // Example of Database Structure for urls and users
 const urlDatabase = {
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
-  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" },
-  "b6UTxQ": { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  "i3BoGr": { longURL: "https://www.youtube.com", userID: "aJ48lW" }
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID",
+    visitors: ["abc", "efg"],
+    visitorLog: [
+      { id: "abc", date: "2021-01-23T21:42:44.583Z" },
+      { id: "efg", date: "2021-01-23T21:58:41.431Z" }
+    ]
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "user2RandomID",
+    visitors: [],
+    visitorLog: {}
+  },
+  "b6UTxQ": {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+    visitors: [],
+    visitorLog: {}
+  },
+  "i3BoGr": {
+    longURL: "https://www.youtube.com",
+    userID: "aJ48lW",
+    visitors: [],
+    visitorLog: {}
+  }
 };
 
 const users = {
@@ -117,11 +140,17 @@ app.get("/urls/:shortURL", (req, res) => {
   } else {
 
     const longURL = urlDatabase[shortURL].longURL;
+    const visitCounter = urlDatabase[shortURL].visitorLog.length;
+    const uniqueCounter = urlDatabase[shortURL].visitors.length;
+    const timeLog = urlDatabase[shortURL].visitorLog;
     
     const templateVars = {
       shortURL,
       longURL,
-      user
+      user,
+      visitCounter,
+      uniqueCounter,
+      timeLog
     };
     res.render("urls_show", templateVars);
   }
@@ -131,15 +160,27 @@ app.get("/urls/:shortURL", (req, res) => {
 // if URL for the given ID does not exist, return a 404 error message
 app.get("/u/:shortURL", (req, res) => {
 
+  // checks user if they have a guestID cookie
+  // generates a new guestID cookie if user does not
+  const guestCookie = req.cookies['guestID'];
+  if (!guestCookie) {
+    const newID = generateRandomString();
+    res.cookie('guestID', newID);
+  }
+
   const shortURL = req.params.shortURL;
   
   if (!urlDatabase[shortURL]) {
     res.sendStatus(404);
   } else {
+    // updates visitor count and log
+    const guestID = req.cookies['guestID'];
+    update(guestID, urlDatabase[shortURL]);
+
+    // redirects page
     const longURL = urlDatabase[shortURL].longURL;
     res.redirect(longURL);
   }
-
 });
 
 
@@ -160,10 +201,15 @@ app.post("/urls", (req, res) => {
     // assigns the logged user ID to the user ID of the shortURL
     const userID = user.id;
 
+    const visitors = [];
+    const visitorLog = [];
+
     // adds the new shortURL onto the database
     urlDatabase[shortURL] = {
       longURL,
-      userID
+      userID,
+      visitors,
+      visitorLog
     };
     res.redirect(`/urls/${shortURL}`);
   }
@@ -266,7 +312,7 @@ app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.sendStatus(400);
   } else if (getUserByEmail(req.body.email, users)) {
-    res.sendStatus(400);
+    res.status(400).send("Email already exists");
   } else {
     // generates a new ID for the user
     const id = generateRandomString();
