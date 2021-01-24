@@ -16,6 +16,8 @@
     <div class="card-body">
       <h5 class="card-title">TinyURL for: <a href="<%= longURL %>"><%= longURL %></a></h5>
       <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+      <p class="card-text">Times visited: <%= visitCounter %></p>
+      <p class="card-text">Unique visitors: <%= uniqueCounter %></p>
     </div>
     <div class="card-footer text-muted">
       <h1 class="card-title">Edit</h1>
@@ -26,8 +28,25 @@
         <button type="Submit" class="btn btn-primary">Submit</button>
       </form>
     </div>
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th scope="col">User ID</th>
+          <th scope="col">Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(let log of timeLog) { %> 
+          <tr>
+            <td><%= log.id %></td>
+            <td><%= log.date %></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
   </div>
 
+  
   
   
 
