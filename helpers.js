@@ -29,8 +29,33 @@ const urlsForUser = function(id, urlDatabase) {
   return database;
 };
 
+
+// updates the visitor log and unique visitors count
+const update = function(id, shortURL) {
+  addNewVisitor(id, shortURL.visitors);
+  addNewLog(id, shortURL.visitorLog);
+};
+
+// adds a new user ID to the visitors list
+// does not add it if user ID already exists in visitors
+const addNewVisitor = function(id, visitors) {
+  if (!visitors.includes(id)) {
+    visitors.push(id);
+  }
+};
+
+// adds a new log to the visitor log
+const addNewLog = function(id, visitorlog) {
+  const date = new Date();
+  const log = { id, date };
+  visitorlog.push(log);
+};
+
 module.exports = {
   generateRandomString,
   getUserByEmail,
-  urlsForUser
+  urlsForUser,
+  update,
+  addNewVisitor,
+  addNewLog
 };
