@@ -163,9 +163,10 @@ app.get("/u/:shortURL", (req, res) => {
   // checks user if they have a guestID cookie
   // generates a new guestID cookie if user does not
   const guestCookie = req.cookies['guestID'];
+  let guestID = guestCookie;
   if (!guestCookie) {
-    const newID = generateRandomString();
-    res.cookie('guestID', newID);
+    guestID = generateRandomString();
+    res.cookie('guestID', guestID);
   }
 
   const shortURL = req.params.shortURL;
@@ -174,7 +175,6 @@ app.get("/u/:shortURL", (req, res) => {
     res.sendStatus(404);
   } else {
     // updates visitor count and log
-    const guestID = req.cookies['guestID'];
     update(guestID, urlDatabase[shortURL]);
 
     // redirects page
